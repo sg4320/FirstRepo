@@ -39,22 +39,25 @@ def getBondDuration(y, face, couponRate, m, ppy=1):
 
     return bondDuration
 
-def getBondPrice_E(face, couponRate, m, yc):
+def getBondPrice_E(face, couponRate, yc):
+    # Calculate the bond's maturity by the length of the yield curve
+    m = len(yc)
+    
+    # Initialize the price of the bond
+    bond_price = 0
+    
+    # Calculate the coupon payment
     coupon_payment = face * couponRate
-    bondPrice = 0
-
-    # Loop over each time period and corresponding yield curve rate
-    for t, y in enumerate(yc, start=1):
-        if t != m:
-            # Present value of coupon payments
-            pv = coupon_payment / ((1 + y) ** t)
-        else:
-            # Present value of the final coupon payment plus face value
-            pv = (coupon_payment + face) / ((1 + y) ** t)
-        
-        bondPrice += pv
-
-    return bondPrice
+    
+    # Loop through each year up to maturity
+    for t in range(1, m + 1):
+        # Calculate the present value of the coupon payment
+        # If it's the last year, add the face value to the coupon payment
+        cash_flow = coupon_payment + (face if t == m else 0)
+        # Discount the cash flow to present value using the yield for that year
+        bond_price += cash_flow / ((1 + yc[t-1]) ** t)
+    
+    return bond_price
 
 def getBondPrice_Z(face, couponRate, times, yc):
     # Calculate the coupon payment
